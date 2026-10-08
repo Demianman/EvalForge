@@ -1,0 +1,16 @@
+.env
+*.db
+*.pyc
+__pycache__/
+.pytest_cache/
+.venv/
+node_modules/
+.next/
+coverage/
+test-results/
+playwright-report/
+*.publish.json
+*.publish.ts
+*.tsbuildinfo
+AGENTS.md
+CLAUDE.md

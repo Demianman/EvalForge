@@ -106,6 +106,8 @@ cd frontend && npm run lint && npm run typecheck && npm run build
 cd frontend && npx playwright install chromium && npm run test:e2e
 ```
 
+Set `UPDATE_SCREENSHOTS=1` when running the E2E command only when intentionally refreshing the committed portfolio screenshots.
+
 The Playwright test starts isolated local backend/frontend servers and verifies the core sign-in → deterministic evaluation → results workflow in Chromium. GitHub Actions runs the same checks and validates that the Alembic migration applies to a clean database.
 
 ### CI release gate

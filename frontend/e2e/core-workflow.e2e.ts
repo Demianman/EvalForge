@@ -8,7 +8,9 @@ test("sign in, run a deterministic evaluation, and inspect results", async ({ pa
 
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
-  await page.screenshot({ path: "../docs/screenshots/dashboard.png", fullPage: true });
+  if (process.env.UPDATE_SCREENSHOTS === "1") {
+    await page.screenshot({ path: "../docs/screenshots/dashboard.png", fullPage: true });
+  }
   await page.getByRole("link", { name: "Run evaluation" }).click();
 
   await page.locator('input[name="name"]').fill(`E2E clinical extraction ${Date.now()}`);
@@ -18,5 +20,7 @@ test("sign in, run a deterministic evaluation, and inspect results", async ({ pa
   await expect(page).toHaveURL(/\/experiments\/\d+$/);
   await expect(page.getByText("Release quality gate: Passed")).toBeVisible();
   await expect(page.getByRole("link", { name: /Patient started metformin/ })).toBeVisible();
-  await page.screenshot({ path: "../docs/screenshots/evaluation-results.png", fullPage: true });
+  if (process.env.UPDATE_SCREENSHOTS === "1") {
+    await page.screenshot({ path: "../docs/screenshots/evaluation-results.png", fullPage: true });
+  }
 });

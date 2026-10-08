@@ -1,5 +1,7 @@
 # EvalForge
 
+[![CI](https://github.com/Demianman/EvalForge/actions/workflows/ci.yml/badge.svg)](https://github.com/Demianman/EvalForge/actions/workflows/ci.yml)
+
 **AI regression testing that makes model and prompt changes reviewable.** EvalForge is a full-stack evaluation workspace for building test datasets, running reproducible evaluations, comparing candidate versions against a baseline, and recording human review decisions.
 
 The bundled clinical entity extraction data is entirely synthetic. No proprietary code, patient data, or paid model API is required.

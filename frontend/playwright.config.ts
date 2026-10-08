@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const backendPython = process.env.EVALFORGE_PYTHON ?? ".venv/bin/python";
+
 export default defineConfig({
   testDir: "./e2e",
   testMatch: "**/*.e2e.ts",
@@ -14,7 +16,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: [
     {
-      command: "DATABASE_URL=sqlite:///./e2e.db JOB_MODE=sync .venv/bin/python -m alembic upgrade head && DATABASE_URL=sqlite:///./e2e.db JOB_MODE=sync .venv/bin/python -m app.seed && DATABASE_URL=sqlite:///./e2e.db JOB_MODE=sync .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+      command: `DATABASE_URL=sqlite:///./e2e.db JOB_MODE=sync ${backendPython} -m alembic upgrade head && DATABASE_URL=sqlite:///./e2e.db JOB_MODE=sync ${backendPython} -m app.seed && DATABASE_URL=sqlite:///./e2e.db JOB_MODE=sync ${backendPython} -m uvicorn app.main:app --host 127.0.0.1 --port 8000`,
       cwd: "../backend",
       url: "http://127.0.0.1:8000/health",
       reuseExistingServer: false,

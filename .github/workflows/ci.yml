@@ -71,3 +71,5 @@ jobs:
         working-directory: frontend
       - run: npm run test:e2e
         working-directory: frontend
+        env:
+          EVALFORGE_PYTHON: python

@@ -265,6 +265,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rag/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rag Documents */
+        get: operations["rag_documents_api_rag_documents_get"];
+        put?: never;
+        /** Create Rag Document */
+        post: operations["create_rag_document_api_rag_documents_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rag/documents/{document_id}/chunks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rag Document Chunks */
+        get: operations["rag_document_chunks_api_rag_documents__document_id__chunks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rag/evaluations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Rag Evaluation */
+        post: operations["create_rag_evaluation_api_rag_evaluations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rag/evaluations/{evaluation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rag Evaluation */
+        get: operations["rag_evaluation_api_rag_evaluations__evaluation_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/results/{result_id}": {
         parameters: {
             query?: never;
@@ -514,6 +583,188 @@ export interface components {
             checks: components["schemas"]["QualityCheck"][];
             /** Passed */
             passed: boolean;
+        };
+        /** RagChunkOut */
+        RagChunkOut: {
+            /** Chunk Metadata */
+            chunk_metadata: {
+                [key: string]: unknown;
+            };
+            /** Content */
+            content: string;
+            /** Document Id */
+            document_id: number;
+            /** Id */
+            id: number;
+            /** Position */
+            position: number;
+        };
+        /** RagCitation */
+        RagCitation: {
+            /** Chunk Id */
+            chunk_id: number;
+            /** Content */
+            content: string;
+            /** Document Id */
+            document_id: number;
+            /** Document Title */
+            document_title: string;
+            /** Position */
+            position: number;
+            /** Score */
+            score: number;
+            /** Source Uri */
+            source_uri: string;
+        };
+        /** RagDocumentIn */
+        RagDocumentIn: {
+            /**
+             * Chunk Overlap
+             * @default 15
+             */
+            chunk_overlap: number;
+            /**
+             * Chunk Size
+             * @default 80
+             */
+            chunk_size: number;
+            /** Content */
+            content: string;
+            /** Project Id */
+            project_id: number;
+            /**
+             * Source Uri
+             * @default
+             */
+            source_uri: string;
+            /** Title */
+            title: string;
+        };
+        /** RagDocumentOut */
+        RagDocumentOut: {
+            /** Chunk Count */
+            chunk_count: number;
+            /** Content Sha256 */
+            content_sha256: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Project Id */
+            project_id: number;
+            /** Source Uri */
+            source_uri: string;
+            /** Title */
+            title: string;
+        };
+        /** RagEvaluationIn */
+        RagEvaluationIn: {
+            /**
+             * @default {
+             *       "method": "vector",
+             *       "top_k": 3
+             *     }
+             */
+            baseline: components["schemas"]["RagRetrievalConfig"];
+            /**
+             * @default {
+             *       "method": "hybrid",
+             *       "top_k": 3
+             *     }
+             */
+            candidate: components["schemas"]["RagRetrievalConfig"];
+            /** Name */
+            name: string;
+            /** Project Id */
+            project_id: number;
+            /** Queries */
+            queries: components["schemas"]["RagQuery"][];
+        };
+        /** RagEvaluationOut */
+        RagEvaluationOut: {
+            baseline_config: components["schemas"]["RagRetrievalConfig"];
+            candidate_config: components["schemas"]["RagRetrievalConfig"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Project Id */
+            project_id: number;
+            /** Results */
+            results: components["schemas"]["RagQueryResult"][];
+            summary: components["schemas"]["RagEvaluationSummary"];
+        };
+        /** RagEvaluationSummary */
+        RagEvaluationSummary: {
+            /** Baseline Mrr */
+            baseline_mrr: number;
+            /** Baseline Recall At K */
+            baseline_recall_at_k: number;
+            /** Candidate Mrr */
+            candidate_mrr: number;
+            /** Candidate Recall At K */
+            candidate_recall_at_k: number;
+            /** Improvements */
+            improvements: number;
+            /** Quality Gate Passed */
+            quality_gate_passed: boolean;
+            /** Queries */
+            queries: number;
+            /** Regressions */
+            regressions: number;
+        };
+        /** RagMethodResult */
+        RagMethodResult: {
+            /** Answer */
+            answer: string;
+            /** Citations */
+            citations: components["schemas"]["RagCitation"][];
+            /** Mrr */
+            mrr: number;
+            /** Recall At K */
+            recall_at_k: number;
+        };
+        /** RagQuery */
+        RagQuery: {
+            /** Expected Chunk Ids */
+            expected_chunk_ids: number[];
+            /** Question */
+            question: string;
+        };
+        /** RagQueryResult */
+        RagQueryResult: {
+            baseline: components["schemas"]["RagMethodResult"];
+            candidate: components["schemas"]["RagMethodResult"];
+            /**
+             * Change
+             * @enum {string}
+             */
+            change: "regression" | "improvement" | "unchanged";
+            /** Expected Chunk Ids */
+            expected_chunk_ids: number[];
+            /** Question */
+            question: string;
+        };
+        /** RagRetrievalConfig */
+        RagRetrievalConfig: {
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "vector" | "hybrid";
+            /**
+             * Top K
+             * @default 3
+             */
+            top_k: number;
         };
         /** ResultOut */
         ResultOut: {
@@ -1398,6 +1649,165 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rag_documents_api_rag_documents_get: {
+        parameters: {
+            query: {
+                project_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RagDocumentOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_rag_document_api_rag_documents_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RagDocumentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RagDocumentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rag_document_chunks_api_rag_documents__document_id__chunks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RagChunkOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_rag_evaluation_api_rag_evaluations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RagEvaluationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RagEvaluationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rag_evaluation_api_rag_evaluations__evaluation_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                evaluation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RagEvaluationOut"];
                 };
             };
             /** @description Validation Error */

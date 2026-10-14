@@ -221,3 +221,95 @@ class DashboardOut(BaseModel):
     projects: list[ProjectOut]
     recent_runs: list[RunOut]
     metrics: DashboardMetrics
+
+
+class RagDocumentIn(BaseModel):
+    project_id: int
+    title: str = Field(min_length=2, max_length=240)
+    source_uri: str = Field(default="", max_length=1000)
+    content: str = Field(min_length=20, max_length=200000)
+    chunk_size: int = Field(default=80, ge=20, le=500)
+    chunk_overlap: int = Field(default=15, ge=0, le=100)
+
+
+class RagDocumentOut(BaseModel):
+    id: int
+    project_id: int
+    title: str
+    source_uri: str
+    content_sha256: str
+    chunk_count: int
+    created_at: datetime
+
+
+class RagChunkOut(BaseModel):
+    id: int
+    document_id: int
+    position: int
+    content: str
+    chunk_metadata: dict[str, Any]
+
+
+class RagCitation(BaseModel):
+    chunk_id: int
+    document_id: int
+    document_title: str
+    source_uri: str
+    position: int
+    content: str
+    score: float
+
+
+class RagRetrievalConfig(BaseModel):
+    method: Literal["vector", "hybrid"]
+    top_k: int = Field(default=3, ge=1, le=10)
+
+
+class RagQuery(BaseModel):
+    question: str = Field(min_length=3, max_length=2000)
+    expected_chunk_ids: list[int] = Field(min_length=1)
+
+
+class RagEvaluationIn(BaseModel):
+    project_id: int
+    name: str = Field(min_length=2, max_length=160)
+    queries: list[RagQuery] = Field(min_length=1, max_length=100)
+    baseline: RagRetrievalConfig = RagRetrievalConfig(method="vector", top_k=3)
+    candidate: RagRetrievalConfig = RagRetrievalConfig(method="hybrid", top_k=3)
+
+
+class RagMethodResult(BaseModel):
+    answer: str
+    citations: list[RagCitation]
+    recall_at_k: float
+    mrr: float
+
+
+class RagQueryResult(BaseModel):
+    question: str
+    expected_chunk_ids: list[int]
+    change: Literal["regression", "improvement", "unchanged"]
+    baseline: RagMethodResult
+    candidate: RagMethodResult
+
+
+class RagEvaluationSummary(BaseModel):
+    queries: int
+    baseline_recall_at_k: float
+    candidate_recall_at_k: float
+    baseline_mrr: float
+    candidate_mrr: float
+    regressions: int
+    improvements: int
+    quality_gate_passed: bool
+
+
+class RagEvaluationOut(ORMModel):
+    id: int
+    project_id: int
+    name: str
+    baseline_config: RagRetrievalConfig
+    candidate_config: RagRetrievalConfig
+    results: list[RagQueryResult]
+    summary: RagEvaluationSummary
+    created_at: datetime

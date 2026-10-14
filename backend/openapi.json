@@ -466,6 +466,433 @@
         "title": "QualityGate",
         "type": "object"
       },
+      "RagChunkOut": {
+        "properties": {
+          "chunk_metadata": {
+            "additionalProperties": true,
+            "title": "Chunk Metadata",
+            "type": "object"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "document_id": {
+            "title": "Document Id",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "document_id",
+          "position",
+          "content",
+          "chunk_metadata"
+        ],
+        "title": "RagChunkOut",
+        "type": "object"
+      },
+      "RagCitation": {
+        "properties": {
+          "chunk_id": {
+            "title": "Chunk Id",
+            "type": "integer"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "document_id": {
+            "title": "Document Id",
+            "type": "integer"
+          },
+          "document_title": {
+            "title": "Document Title",
+            "type": "string"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "source_uri": {
+            "title": "Source Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chunk_id",
+          "document_id",
+          "document_title",
+          "source_uri",
+          "position",
+          "content",
+          "score"
+        ],
+        "title": "RagCitation",
+        "type": "object"
+      },
+      "RagDocumentIn": {
+        "properties": {
+          "chunk_overlap": {
+            "default": 15,
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Chunk Overlap",
+            "type": "integer"
+          },
+          "chunk_size": {
+            "default": 80,
+            "maximum": 500.0,
+            "minimum": 20.0,
+            "title": "Chunk Size",
+            "type": "integer"
+          },
+          "content": {
+            "maxLength": 200000,
+            "minLength": 20,
+            "title": "Content",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "integer"
+          },
+          "source_uri": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Source Uri",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 240,
+            "minLength": 2,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id",
+          "title",
+          "content"
+        ],
+        "title": "RagDocumentIn",
+        "type": "object"
+      },
+      "RagDocumentOut": {
+        "properties": {
+          "chunk_count": {
+            "title": "Chunk Count",
+            "type": "integer"
+          },
+          "content_sha256": {
+            "title": "Content Sha256",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "integer"
+          },
+          "source_uri": {
+            "title": "Source Uri",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "title",
+          "source_uri",
+          "content_sha256",
+          "chunk_count",
+          "created_at"
+        ],
+        "title": "RagDocumentOut",
+        "type": "object"
+      },
+      "RagEvaluationIn": {
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/RagRetrievalConfig",
+            "default": {
+              "method": "vector",
+              "top_k": 3
+            }
+          },
+          "candidate": {
+            "$ref": "#/components/schemas/RagRetrievalConfig",
+            "default": {
+              "method": "hybrid",
+              "top_k": 3
+            }
+          },
+          "name": {
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Name",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "integer"
+          },
+          "queries": {
+            "items": {
+              "$ref": "#/components/schemas/RagQuery"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Queries",
+            "type": "array"
+          }
+        },
+        "required": [
+          "project_id",
+          "name",
+          "queries"
+        ],
+        "title": "RagEvaluationIn",
+        "type": "object"
+      },
+      "RagEvaluationOut": {
+        "properties": {
+          "baseline_config": {
+            "$ref": "#/components/schemas/RagRetrievalConfig"
+          },
+          "candidate_config": {
+            "$ref": "#/components/schemas/RagRetrievalConfig"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "integer"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/RagQueryResult"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/RagEvaluationSummary"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "name",
+          "baseline_config",
+          "candidate_config",
+          "results",
+          "summary",
+          "created_at"
+        ],
+        "title": "RagEvaluationOut",
+        "type": "object"
+      },
+      "RagEvaluationSummary": {
+        "properties": {
+          "baseline_mrr": {
+            "title": "Baseline Mrr",
+            "type": "number"
+          },
+          "baseline_recall_at_k": {
+            "title": "Baseline Recall At K",
+            "type": "number"
+          },
+          "candidate_mrr": {
+            "title": "Candidate Mrr",
+            "type": "number"
+          },
+          "candidate_recall_at_k": {
+            "title": "Candidate Recall At K",
+            "type": "number"
+          },
+          "improvements": {
+            "title": "Improvements",
+            "type": "integer"
+          },
+          "quality_gate_passed": {
+            "title": "Quality Gate Passed",
+            "type": "boolean"
+          },
+          "queries": {
+            "title": "Queries",
+            "type": "integer"
+          },
+          "regressions": {
+            "title": "Regressions",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "queries",
+          "baseline_recall_at_k",
+          "candidate_recall_at_k",
+          "baseline_mrr",
+          "candidate_mrr",
+          "regressions",
+          "improvements",
+          "quality_gate_passed"
+        ],
+        "title": "RagEvaluationSummary",
+        "type": "object"
+      },
+      "RagMethodResult": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/RagCitation"
+            },
+            "title": "Citations",
+            "type": "array"
+          },
+          "mrr": {
+            "title": "Mrr",
+            "type": "number"
+          },
+          "recall_at_k": {
+            "title": "Recall At K",
+            "type": "number"
+          }
+        },
+        "required": [
+          "answer",
+          "citations",
+          "recall_at_k",
+          "mrr"
+        ],
+        "title": "RagMethodResult",
+        "type": "object"
+      },
+      "RagQuery": {
+        "properties": {
+          "expected_chunk_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1,
+            "title": "Expected Chunk Ids",
+            "type": "array"
+          },
+          "question": {
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "expected_chunk_ids"
+        ],
+        "title": "RagQuery",
+        "type": "object"
+      },
+      "RagQueryResult": {
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/RagMethodResult"
+          },
+          "candidate": {
+            "$ref": "#/components/schemas/RagMethodResult"
+          },
+          "change": {
+            "enum": [
+              "regression",
+              "improvement",
+              "unchanged"
+            ],
+            "title": "Change",
+            "type": "string"
+          },
+          "expected_chunk_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Expected Chunk Ids",
+            "type": "array"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "expected_chunk_ids",
+          "change",
+          "baseline",
+          "candidate"
+        ],
+        "title": "RagQueryResult",
+        "type": "object"
+      },
+      "RagRetrievalConfig": {
+        "properties": {
+          "method": {
+            "enum": [
+              "vector",
+              "hybrid"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "top_k": {
+            "default": 3,
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "title": "RagRetrievalConfig",
+        "type": "object"
+      },
       "ResultOut": {
         "properties": {
           "actual_output": {
@@ -1968,6 +2395,205 @@
           }
         },
         "summary": "Create Project"
+      }
+    },
+    "/api/rag/documents": {
+      "get": {
+        "operationId": "rag_documents_api_rag_documents_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "title": "Project Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RagDocumentOut"
+                  },
+                  "title": "Response Rag Documents Api Rag Documents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rag Documents"
+      },
+      "post": {
+        "operationId": "create_rag_document_api_rag_documents_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RagDocumentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RagDocumentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Rag Document"
+      }
+    },
+    "/api/rag/documents/{document_id}/chunks": {
+      "get": {
+        "operationId": "rag_document_chunks_api_rag_documents__document_id__chunks_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RagChunkOut"
+                  },
+                  "title": "Response Rag Document Chunks Api Rag Documents  Document Id  Chunks Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rag Document Chunks"
+      }
+    },
+    "/api/rag/evaluations": {
+      "post": {
+        "operationId": "create_rag_evaluation_api_rag_evaluations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RagEvaluationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RagEvaluationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Rag Evaluation"
+      }
+    },
+    "/api/rag/evaluations/{evaluation_id}": {
+      "get": {
+        "operationId": "rag_evaluation_api_rag_evaluations__evaluation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "evaluation_id",
+            "required": true,
+            "schema": {
+              "title": "Evaluation Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RagEvaluationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rag Evaluation"
       }
     },
     "/api/results/{result_id}": {

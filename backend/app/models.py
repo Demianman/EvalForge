@@ -30,6 +30,8 @@ class Project(Base):
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     datasets: Mapped[list["Dataset"]] = relationship(back_populates="project", cascade="all, delete-orphan")
+    rag_documents: Mapped[list["RagDocument"]] = relationship(back_populates="project", cascade="all, delete-orphan")
+    rag_evaluations: Mapped[list["RagEvaluation"]] = relationship(back_populates="project", cascade="all, delete-orphan")
 
 
 class Dataset(Base):
@@ -106,3 +108,42 @@ class Review(Base):
     comment: Mapped[str] = mapped_column(Text, default="")
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     result: Mapped[EvaluationResult] = relationship(back_populates="review")
+
+
+class RagDocument(Base):
+    __tablename__ = "rag_documents"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    title: Mapped[str] = mapped_column(String(240))
+    source_uri: Mapped[str] = mapped_column(String(1000), default="")
+    content_sha256: Mapped[str] = mapped_column(String(64), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    project: Mapped[Project] = relationship(back_populates="rag_documents")
+    chunks: Mapped[list["RagChunk"]] = relationship(back_populates="document", cascade="all, delete-orphan")
+
+
+class RagChunk(Base):
+    __tablename__ = "rag_chunks"
+    __table_args__ = (UniqueConstraint("document_id", "position"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    document_id: Mapped[int] = mapped_column(ForeignKey("rag_documents.id"), index=True)
+    position: Mapped[int] = mapped_column(Integer)
+    content: Mapped[str] = mapped_column(Text)
+    token_set: Mapped[list] = mapped_column(JSON, default=list)
+    embedding: Mapped[list] = mapped_column(JSON, default=list)
+    chunk_metadata: Mapped[dict] = mapped_column(JSON, default=dict)
+    document: Mapped[RagDocument] = relationship(back_populates="chunks")
+
+
+class RagEvaluation(Base):
+    __tablename__ = "rag_evaluations"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    name: Mapped[str] = mapped_column(String(160))
+    queries: Mapped[list] = mapped_column(JSON)
+    baseline_config: Mapped[dict] = mapped_column(JSON)
+    candidate_config: Mapped[dict] = mapped_column(JSON)
+    results: Mapped[list] = mapped_column(JSON)
+    summary: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    project: Mapped[Project] = relationship(back_populates="rag_evaluations")

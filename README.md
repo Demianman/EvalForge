@@ -20,6 +20,8 @@ The container startup applies migrations and creates the demo user, project, dat
 
 ![Deterministic evaluation results and release gate](docs/screenshots/evaluation-results.png)
 
+![RAG retrieval comparison with citations and quality gate](docs/screenshots/rag-lab.png)
+
 ## Engineering scope
 
 - Next.js App Router, React, TypeScript, Tailwind, shadcn/ui-style Radix primitives, TanStack Query
@@ -32,6 +34,9 @@ The container startup applies migrations and creates the demo user, project, dat
 - Automated release quality gate using pass-rate, F1, and p95 latency thresholds
 - Redis-backed RQ worker with per-case progress, retry backoff, cancellation, and idempotent result creation
 - Result metrics, baseline comparison, regression/improvement classification
+- RAG knowledge-document ingestion with idempotent SHA-256 content identity and versioned chunks
+- Deterministic local feature-hash embeddings plus vector and hybrid reciprocal-rank-fusion retrieval
+- Expected-evidence RAG test cases with Recall@K, MRR, citations, regression/improvement classification, and a no-regression gate
 - Optimistic human-review mutation with cache snapshot and rollback on API failure
 - pytest API tests, Vitest + Testing Library components, lint/typecheck/build CI
 
@@ -45,6 +50,10 @@ flowchart LR
   Queue --> Worker[Evaluation worker]
   Worker --> Runner[Provider abstraction]
   Runner --> Local[Deterministic rules v1/v2]
+  API --> RAG[RAG ingestion and evaluation]
+  RAG --> Chunks[Versioned chunks + local embeddings]
+  RAG --> Retrieval[Vector baseline / hybrid RRF candidate]
+  Retrieval --> Citations[Cited grounded output + Recall@K / MRR]
   API --> ORM[SQLAlchemy]
   ORM --> DB[(PostgreSQL)]
   Alembic[Alembic] --> DB
@@ -83,6 +92,7 @@ npm run dev
 | Datasets | `GET/POST/PUT/DELETE /api/datasets`, case CRUD, `/import` |
 | Experiments | create/list/detail, paginated `/results`, `/compare` |
 | Review | `GET /api/results/:id`, `PUT /api/results/:id/review` |
+| RAG Lab | document ingestion/list/chunks, create/read retrieval evaluations |
 
 Errors use a consistent `{ "error": { "code", "message" } }` envelope. FastAPI also publishes interactive OpenAPI documentation at `http://localhost:8000/docs`.
 
@@ -126,7 +136,9 @@ python -m app.cli gate --run-id 42
 - **Local session auth:** a signed, HTTP-only, same-site cookie demonstrates the auth boundary without forcing OAuth setup. Production deployment should add CSRF protection, session rotation/revocation, secure-cookie enforcement, and a managed identity provider.
 - **Exact JSON scoring:** this makes pass/fail reproducible. Future evaluators can add schema-aware, semantic, RAG, and LLM-judge scoring.
 - **Layered scoring:** exact match remains the release pass/fail signal while field-level precision, recall, and F1 explain partial extraction quality.
+- **Offline RAG first:** deterministic feature-hash embeddings make CI reproducible and demonstrate retrieval/evaluation boundaries without paid keys. The storage and retriever interfaces can later move to managed embeddings, PostgreSQL `pgvector`, and a learned reranker; those are not claimed as implemented today.
+- **Retrieval before generation:** the current grounded answer is extractive and citation-preserving. This keeps evaluation focused on evidence quality before introducing an LLM generator and its additional hallucination, cost, and latency variables.
 
 ## Future work
 
-Provider adapters and encrypted credentials, RBAC/workspaces, audit events, dataset and prompt versioning, accessibility audit, and deployment infrastructure remain future work.
+Provider adapters and encrypted credentials, production `pgvector`, learned reranking, generative answer evaluation, RBAC/workspaces, audit events, dataset and prompt versioning, accessibility audit, and deployment infrastructure remain future work.

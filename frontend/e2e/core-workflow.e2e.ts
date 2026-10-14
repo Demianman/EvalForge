@@ -23,4 +23,14 @@ test("sign in, run a deterministic evaluation, and inspect results", async ({ pa
   if (process.env.UPDATE_SCREENSHOTS === "1") {
     await page.screenshot({ path: "../docs/screenshots/evaluation-results.png", fullPage: true });
   }
+
+  await page.getByRole("link", { name: "RAG Lab" }).click();
+  await expect(page.getByRole("heading", { name: "RAG Lab" })).toBeVisible();
+  await expect(page.getByText("Synthetic medication safety guide")).toBeVisible();
+  await page.getByRole("button", { name: "Run RAG comparison" }).click();
+  await expect(page.getByText("No-regression gate: Passed")).toBeVisible();
+  await expect(page.getByText(/fixture:\/\/synthetic-medication-guide/)).toBeVisible();
+  if (process.env.UPDATE_SCREENSHOTS === "1") {
+    await page.screenshot({ path: "../docs/screenshots/rag-lab.png", fullPage: true });
+  }
 });

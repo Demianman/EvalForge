@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import io
 import json
 import logging
@@ -12,8 +13,9 @@ from passlib.context import CryptContext
 from itsdangerous import BadSignature, URLSafeSerializer
 from .config import settings
 from .database import get_db
-from .models import Dataset, EvaluationResult, ExperimentRun, Project, Review, TestCase, User
+from .models import Dataset, EvaluationResult, ExperimentRun, Project, RagChunk, RagDocument, RagEvaluation, Review, TestCase, User
 from .runner import evaluate_quality_gate, percentile
+from .rag import chunk_text, embed, grounded_answer, metrics as rag_metrics, retrieve, tokenize
 from .jobs import enqueue_run, execute_run
 from .schemas import (
     CompareOut,
@@ -26,6 +28,11 @@ from .schemas import (
     LoginIn,
     ProjectIn,
     ProjectOut,
+    RagDocumentIn,
+    RagDocumentOut,
+    RagChunkOut,
+    RagEvaluationIn,
+    RagEvaluationOut,
     ResultOut,
     ResultPage,
     ReviewIn,
@@ -297,3 +304,76 @@ def dashboard(db: Session = Depends(get_db), user: User = Depends(current_user))
     runs = db.scalars(select(ExperimentRun).where(ExperimentRun.project_id.in_(project_ids)).order_by(ExperimentRun.created_at.desc()).limit(8)).all() if project_ids else []
     result_rows = [r for run in runs for r in run.results]; total = len(result_rows); passed = sum(r.passed for r in result_rows)
     return {"projects": projects, "recent_runs": runs, "metrics": {"projects": len(projects), "runs": len(runs), "pass_rate": passed/total if total else 0, "regressions": sum(not r.passed for r in result_rows)}}
+
+
+def serialize_rag_document(document: RagDocument):
+    return {"id": document.id, "project_id": document.project_id, "title": document.title, "source_uri": document.source_uri, "content_sha256": document.content_sha256, "chunk_count": len(document.chunks), "created_at": document.created_at}
+
+
+@app.get("/api/rag/documents", response_model=list[RagDocumentOut])
+def rag_documents(project_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    project = db.get(Project, project_id)
+    if not project or project.owner_id != user.id: raise HTTPException(404, "Project not found")
+    documents = db.scalars(select(RagDocument).where(RagDocument.project_id == project_id).order_by(RagDocument.created_at.desc())).all()
+    return [serialize_rag_document(document) for document in documents]
+
+
+@app.post("/api/rag/documents", status_code=201, response_model=RagDocumentOut)
+def create_rag_document(data: RagDocumentIn, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    project = db.get(Project, data.project_id)
+    if not project or project.owner_id != user.id: raise HTTPException(404, "Project not found")
+    if data.chunk_overlap >= data.chunk_size: raise HTTPException(422, "chunk_overlap must be smaller than chunk_size")
+    digest = hashlib.sha256(data.content.encode()).hexdigest()
+    existing = db.scalar(select(RagDocument).where(RagDocument.project_id == data.project_id, RagDocument.content_sha256 == digest))
+    if existing: return serialize_rag_document(existing)
+    document = RagDocument(project_id=data.project_id, title=data.title, source_uri=data.source_uri, content_sha256=digest)
+    db.add(document); db.flush()
+    chunks = chunk_text(data.content, data.chunk_size, data.chunk_overlap)
+    db.add_all([RagChunk(document_id=document.id, position=index, content=content, token_set=sorted(set(tokenize(content))), embedding=embed(content), chunk_metadata={"chunk_size": data.chunk_size, "chunk_overlap": data.chunk_overlap}) for index, content in enumerate(chunks)])
+    db.commit(); db.refresh(document)
+    log.info("rag_document_indexed document_id=%s chunks=%s", document.id, len(chunks))
+    return serialize_rag_document(document)
+
+
+@app.get("/api/rag/documents/{document_id}/chunks", response_model=list[RagChunkOut])
+def rag_document_chunks(document_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    document = db.get(RagDocument, document_id)
+    if not document or document.project.owner_id != user.id: raise HTTPException(404, "RAG document not found")
+    return db.scalars(select(RagChunk).where(RagChunk.document_id == document_id).order_by(RagChunk.position)).all()
+
+
+def serialize_citation(item):
+    chunk = item.chunk
+    return {"chunk_id": chunk.id, "document_id": chunk.document_id, "document_title": chunk.document.title, "source_uri": chunk.document.source_uri, "position": chunk.position, "content": chunk.content, "score": item.score}
+
+
+@app.post("/api/rag/evaluations", status_code=201, response_model=RagEvaluationOut)
+def create_rag_evaluation(data: RagEvaluationIn, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    project = db.get(Project, data.project_id)
+    if not project or project.owner_id != user.id: raise HTTPException(404, "Project not found")
+    chunks = db.scalars(select(RagChunk).join(RagDocument).where(RagDocument.project_id == data.project_id)).all()
+    if not chunks: raise HTTPException(409, "Index at least one document before running a RAG evaluation")
+    available_ids = {chunk.id for chunk in chunks}
+    if any(not set(query.expected_chunk_ids) <= available_ids for query in data.queries): raise HTTPException(422, "expected_chunk_ids must belong to this project")
+    results = []
+    for query in data.queries:
+        baseline_items = retrieve(chunks, query.question, data.baseline.method, data.baseline.top_k)
+        candidate_items = retrieve(chunks, query.question, data.candidate.method, data.candidate.top_k)
+        baseline_metrics = rag_metrics([item.chunk.id for item in baseline_items], query.expected_chunk_ids)
+        candidate_metrics = rag_metrics([item.chunk.id for item in candidate_items], query.expected_chunk_ids)
+        baseline_score = (baseline_metrics["recall_at_k"], baseline_metrics["mrr"])
+        candidate_score = (candidate_metrics["recall_at_k"], candidate_metrics["mrr"])
+        change = "improvement" if candidate_score > baseline_score else "regression" if candidate_score < baseline_score else "unchanged"
+        results.append({"question": query.question, "expected_chunk_ids": query.expected_chunk_ids, "change": change, "baseline": {"answer": grounded_answer(baseline_items), "citations": [serialize_citation(item) for item in baseline_items], **baseline_metrics}, "candidate": {"answer": grounded_answer(candidate_items), "citations": [serialize_citation(item) for item in candidate_items], **candidate_metrics}})
+    count = len(results)
+    summary = {"queries": count, "baseline_recall_at_k": round(sum(row["baseline"]["recall_at_k"] for row in results) / count, 4), "candidate_recall_at_k": round(sum(row["candidate"]["recall_at_k"] for row in results) / count, 4), "baseline_mrr": round(sum(row["baseline"]["mrr"] for row in results) / count, 4), "candidate_mrr": round(sum(row["candidate"]["mrr"] for row in results) / count, 4), "regressions": sum(row["change"] == "regression" for row in results), "improvements": sum(row["change"] == "improvement" for row in results), "quality_gate_passed": all(row["change"] != "regression" for row in results)}
+    evaluation = RagEvaluation(project_id=data.project_id, name=data.name, queries=[query.model_dump() for query in data.queries], baseline_config=data.baseline.model_dump(), candidate_config=data.candidate.model_dump(), results=results, summary=summary)
+    db.add(evaluation); db.commit(); db.refresh(evaluation)
+    return evaluation
+
+
+@app.get("/api/rag/evaluations/{evaluation_id}", response_model=RagEvaluationOut)
+def rag_evaluation(evaluation_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    evaluation = db.get(RagEvaluation, evaluation_id)
+    if not evaluation or evaluation.project.owner_id != user.id: raise HTTPException(404, "RAG evaluation not found")
+    return evaluation

@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Database, FlaskConical, LogOut, ShieldCheck } from "lucide-react";
+import { BarChart3, BookOpenCheck, Database, FlaskConical, LogOut, ShieldCheck } from "lucide-react";
 import { api } from "@/lib/api";
-const nav = [{href:"/dashboard",label:"Dashboard",icon:BarChart3},{href:"/datasets",label:"Datasets",icon:Database},{href:"/experiments/new",label:"New experiment",icon:FlaskConical}];
+const nav = [{href:"/dashboard",label:"Dashboard",icon:BarChart3},{href:"/datasets",label:"Datasets",icon:Database},{href:"/experiments/new",label:"New experiment",icon:FlaskConical},{href:"/rag",label:"RAG Lab",icon:BookOpenCheck}];
 export function Shell({children}:{children:React.ReactNode}) {
   const path=usePathname();
   const router=useRouter();

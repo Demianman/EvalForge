@@ -114,11 +114,13 @@ cd backend && pytest
 cd frontend && npm run test
 cd frontend && npm run lint && npm run typecheck && npm run build
 cd frontend && npx playwright install chromium && npm run test:e2e
+docker compose up --build --detach && python scripts/compose_smoke.py
+docker compose down --volumes --remove-orphans
 ```
 
 Set `UPDATE_SCREENSHOTS=1` when running the E2E command only when intentionally refreshing the committed portfolio screenshots.
 
-The Playwright test starts isolated local backend/frontend servers and verifies the core sign-in → deterministic evaluation → results workflow in Chromium. GitHub Actions runs the same checks and validates that the Alembic migration applies to a clean database.
+The Playwright test starts isolated local backend/frontend servers and verifies the core sign-in → deterministic evaluation → results workflow in Chromium. The Compose smoke test starts a clean five-service stack and verifies frontend reachability, API/session auth, PostgreSQL-backed seed data, Redis/RQ enqueueing, independent-worker completion, result persistence, and the quality gate. GitHub Actions runs both workflows and tears down all Compose volumes afterward.
 
 ### CI release gate
 

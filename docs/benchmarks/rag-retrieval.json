@@ -1,0 +1,90 @@
+{
+  "benchmark": "synthetic protocol evidence retrieval",
+  "seed": 20271014,
+  "queries": 60,
+  "top_k": 5,
+  "chunk_overlap": "10%",
+  "embedding": "deterministic 96-dimensional feature hashing",
+  "results": [
+    {
+      "chunk_size": 200,
+      "method": "vector",
+      "queries": 60,
+      "top_k": 5,
+      "recall_at_5": 0.8667,
+      "mrr": 0.6633,
+      "recall_ci_95": [
+        0.7833,
+        0.95
+      ],
+      "mrr_ci_95": [
+        0.5605,
+        0.7611
+      ]
+    },
+    {
+      "chunk_size": 200,
+      "method": "hybrid",
+      "queries": 60,
+      "top_k": 5,
+      "recall_at_5": 0.95,
+      "mrr": 0.8992,
+      "recall_ci_95": [
+        0.8833,
+        1.0
+      ],
+      "mrr_ci_95": [
+        0.8242,
+        0.9625
+      ]
+    },
+    {
+      "chunk_size": 800,
+      "method": "vector",
+      "queries": 60,
+      "top_k": 5,
+      "recall_at_5": 0.5167,
+      "mrr": 0.3256,
+      "recall_ci_95": [
+        0.4,
+        0.65
+      ],
+      "mrr_ci_95": [
+        0.2311,
+        0.4317
+      ]
+    },
+    {
+      "chunk_size": 800,
+      "method": "hybrid",
+      "queries": 60,
+      "top_k": 5,
+      "recall_at_5": 0.9167,
+      "mrr": 0.7069,
+      "recall_ci_95": [
+        0.8333,
+        0.9833
+      ],
+      "mrr_ci_95": [
+        0.6181,
+        0.7917
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "chunk_size": 200,
+      "hybrid_recall_absolute_lift": 0.0833,
+      "hybrid_mrr_absolute_lift": 0.2358
+    },
+    {
+      "chunk_size": 800,
+      "hybrid_recall_absolute_lift": 0.4,
+      "hybrid_mrr_absolute_lift": 0.3814
+    }
+  ],
+  "limitations": [
+    "Synthetic identifier-heavy corpus; results do not estimate clinical or production performance.",
+    "No semantic embedding model, Chroma, pgvector, reranker, or LLM generator is used."
+  ]
+}

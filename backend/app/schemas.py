@@ -228,7 +228,7 @@ class RagDocumentIn(BaseModel):
     title: str = Field(min_length=2, max_length=240)
     source_uri: str = Field(default="", max_length=1000)
     content: str = Field(min_length=20, max_length=200000)
-    chunk_size: int = Field(default=80, ge=20, le=500)
+    chunk_size: int = Field(default=80, ge=20, le=1200)
     chunk_overlap: int = Field(default=15, ge=0, le=100)
 
 

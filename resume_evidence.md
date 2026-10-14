@@ -35,6 +35,7 @@ GitHub Actions: https://github.com/Demianman/EvalForge/actions/runs/38636430665
 - Compose smoke test submitted a queued evaluation and verified that the independent worker processed and persisted all 5 seeded cases before clean teardown
 - Exact-commit GitHub Actions run `38636430665` passed backend, frontend, E2E, API-contract, migration, and Compose jobs
 - Production dependency audit reported 0 vulnerabilities at the verified milestone
+- Reproducible 60-query synthetic benchmark measured Vector vs Hybrid RRF at equal Top-5: Hybrid Recall@5 was 95.00% vs 86.67% at 200-token chunks (+8.33 percentage points) and 91.67% vs 51.67% at 800-token chunks (+40.00 points)
 
 ## Architecture ownership demonstrated
 
@@ -59,9 +60,10 @@ GitHub Actions: https://github.com/Demianman/EvalForge/actions/runs/38636430665
 - Employer ownership, employer data, patient data, or proprietary model integrations
 - Production `pgvector`, learned reranking, LLM generation, OAuth/RBAC, or cloud deployment
 - Performance or accuracy numbers not recorded in the repository's reproducible tests
+- Generalize the synthetic identifier-heavy benchmark to clinical, production, or semantic-search accuracy
 
 ## Resume bullets
 
 - Built EvalForge, a full-stack AI regression and RAG evaluation platform using Next.js, TypeScript, FastAPI, PostgreSQL, Redis/RQ, and Docker Compose, supporting versioned experiments, baseline comparisons, human review, and automated release gates.
-- Implemented an offline reproducible RAG evaluation pipeline with idempotent document ingestion, vector and hybrid RRF retrieval, evidence citations, Recall@K/MRR metrics, and regression detection on synthetic healthcare content.
+- Implemented an offline RAG evaluation pipeline with idempotent ingestion, citations, Recall@K/MRR, and regression detection; a reproducible 60-query synthetic benchmark measured Hybrid Recall@5 of 95.00% vs 86.67% for Vector at 200-token chunks.
 - Established typed OpenAPI-to-TypeScript contracts and GitHub Actions coverage across 13 backend tests, frontend tests, production builds, Chromium E2E, and a clean five-service Compose workflow that verifies queued worker execution and result persistence.

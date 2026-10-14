@@ -40,6 +40,23 @@ The container startup applies migrations and creates the demo user, project, dat
 - Optimistic human-review mutation with cache snapshot and rollback on API failure
 - pytest API tests, Vitest + Testing Library components, lint/typecheck/build CI
 
+## Reproducible RAG benchmark
+
+The committed benchmark uses 60 fixed synthetic queries, identical Top-5
+retrieval, and the production retrieval functions. It is an
+identifier-heavy engineering benchmark, not a claim about clinical or
+production accuracy.
+
+| Chunk size | Vector Recall@5 | Hybrid Recall@5 | Hybrid absolute lift |
+|---:|---:|---:|---:|
+| 200 | 86.67% | 95.00% | +8.33 pp |
+| 800 | 51.67% | 91.67% | +40.00 pp |
+
+With Vector retrieval, increasing chunk size from 200 to 800 reduced Recall@5
+by 35.00 percentage points in this corpus. See the full
+[methodology, MRR, confidence intervals, and limitations](docs/benchmarks/rag-retrieval.md),
+or reproduce it with `cd backend && python -m benchmarks.rag_retrieval`.
+
 ## Architecture
 
 ```mermaid
@@ -114,6 +131,7 @@ cd backend && pytest
 cd frontend && npm run test
 cd frontend && npm run lint && npm run typecheck && npm run build
 cd frontend && npx playwright install chromium && npm run test:e2e
+cd backend && python -m benchmarks.rag_retrieval
 docker compose up --build --detach && python scripts/compose_smoke.py
 docker compose down --volumes --remove-orphans
 ```

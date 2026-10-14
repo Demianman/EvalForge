@@ -21,7 +21,10 @@ def wait_for(url: str, timeout: int = 180) -> None:
             with urlopen(url, timeout=5) as response:
                 if 200 <= response.status < 400:
                     return
-        except (HTTPError, URLError, TimeoutError) as exc:
+        # Containers can accept a TCP connection a moment before the server is
+        # ready, then reset it while migrations/startup finish. Treat that as
+        # transient during the bounded readiness window.
+        except (HTTPError, URLError, TimeoutError, OSError) as exc:
             last_error = exc
         time.sleep(2)
     raise RuntimeError(f"Timed out waiting for {url}: {last_error}")

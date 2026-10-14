@@ -1,0 +1,67 @@
+# EvalForge — Verified Resume Evidence
+
+Last verified: 2026-10-14  
+Repository: https://github.com/Demianman/EvalForge  
+Verified main commit: `467cd6935817ffe20843feb8c18b4abd7ea65279`  
+GitHub Actions: https://github.com/Demianman/EvalForge/actions/runs/38636430665
+
+## Actual stack
+
+- Next.js App Router, React, TypeScript, Tailwind, TanStack Query, Radix-based UI primitives
+- FastAPI, Pydantic, SQLAlchemy 2, Alembic, PostgreSQL
+- Redis, RQ worker, Docker Compose
+- pytest, Vitest, React Testing Library, Playwright, GitHub Actions
+
+## Implemented and verified features
+
+- Session authentication and owner-scoped projects
+- Dataset and test-case CRUD, validated CSV/JSON import, search, filtering, and pagination
+- Deterministic provider abstraction and reproducible experiment runner
+- Result tables, baseline/candidate comparison, regression/improvement filtering, quality gates, and side-by-side outputs
+- Human accept/reject/comment review with optimistic updates and rollback
+- FastAPI-derived OpenAPI contract and generated TypeScript types with CI drift detection
+- Idempotent RAG document ingestion, versioned chunks, deterministic feature-hash embeddings, vector baseline, hybrid reciprocal-rank-fusion retrieval, citations, Recall@K, MRR, and no-regression gating
+- Structured error envelopes and application logging
+- Synthetic medication extraction and medication-safety fixtures only
+
+## Verification evidence
+
+- Backend: 13 pytest tests passed
+- Frontend: 4 Vitest/React Testing Library tests passed
+- ESLint, TypeScript typecheck, and Next.js production build passed
+- Clean Alembic migration through `0004` passed
+- Chromium E2E passed for sign-in, deterministic evaluation, results, RAG comparison, and citations
+- Clean Linux Docker Compose build/start passed for PostgreSQL, Redis, FastAPI, RQ worker, and Next.js
+- Compose smoke test submitted a queued evaluation and verified that the independent worker processed and persisted all 5 seeded cases before clean teardown
+- Exact-commit GitHub Actions run `38636430665` passed backend, frontend, E2E, API-contract, migration, and Compose jobs
+- Production dependency audit reported 0 vulnerabilities at the verified milestone
+
+## Architecture ownership demonstrated
+
+- Defined the API, persistence, queue/worker, provider, retrieval, evaluation, and frontend state boundaries
+- Used deterministic offline implementations so CI and demonstrations require no paid API key
+- Kept FastAPI schemas as the source of truth for generated frontend contracts
+- Added idempotency at document ingestion and evaluation-result creation boundaries
+- Added release gates at both model-evaluation and CI levels
+
+## Safe claims
+
+- Built and verified a full-stack AI regression and RAG evaluation platform
+- Implemented reproducible evaluation, retrieval comparison, human review, and automated quality gates
+- Designed a PostgreSQL/Redis/RQ architecture and verified it through a clean Docker Compose workflow
+- Implemented typed API contracts and multi-layer automated testing
+- Used synthetic healthcare-themed fixtures with no patient or employer data
+
+## Do not claim
+
+- Real users, customers, production traffic, revenue, or business impact
+- Clinical validation, diagnostic use, treatment recommendations, or medical-device status
+- Employer ownership, employer data, patient data, or proprietary model integrations
+- Production `pgvector`, learned reranking, LLM generation, OAuth/RBAC, or cloud deployment
+- Performance or accuracy numbers not recorded in the repository's reproducible tests
+
+## Resume bullets
+
+- Built EvalForge, a full-stack AI regression and RAG evaluation platform using Next.js, TypeScript, FastAPI, PostgreSQL, Redis/RQ, and Docker Compose, supporting versioned experiments, baseline comparisons, human review, and automated release gates.
+- Implemented an offline reproducible RAG evaluation pipeline with idempotent document ingestion, vector and hybrid RRF retrieval, evidence citations, Recall@K/MRR metrics, and regression detection on synthetic healthcare content.
+- Established typed OpenAPI-to-TypeScript contracts and GitHub Actions coverage across 13 backend tests, frontend tests, production builds, Chromium E2E, and a clean five-service Compose workflow that verifies queued worker execution and result persistence.

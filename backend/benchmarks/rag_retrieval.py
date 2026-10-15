@@ -10,6 +10,7 @@ or patient data. Run from ``backend`` with:
 from __future__ import annotations
 
 import json
+import math
 import random
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -100,6 +101,25 @@ def bootstrap_ci(values: list[float], rng: random.Random) -> list[float]:
     return [round(percentile(means, 0.025), 4), round(percentile(means, 0.975), 4)]
 
 
+def paired_bootstrap_ci(left: list[float], right: list[float], rng: random.Random) -> list[float]:
+    """Percentile CI for the paired mean difference ``right - left``."""
+    differences = [right_value - left_value for left_value, right_value in zip(left, right, strict=True)]
+    return bootstrap_ci(differences, rng)
+
+
+def exact_mcnemar(left: list[float], right: list[float]) -> dict[str, float | int]:
+    """Two-sided exact McNemar test for paired binary retrieval outcomes."""
+    left_only = sum(a == 1 and b == 0 for a, b in zip(left, right, strict=True))
+    right_only = sum(a == 0 and b == 1 for a, b in zip(left, right, strict=True))
+    discordant = left_only + right_only
+    if not discordant:
+        p_value = 1.0
+    else:
+        tail = sum(math.comb(discordant, index) for index in range(min(left_only, right_only) + 1))
+        p_value = min(1.0, 2 * tail / (2**discordant))
+    return {"vector_only": left_only, "hybrid_only": right_only, "two_sided_p": p_value}
+
+
 def evaluate(chunk_size: int, method: str) -> tuple[Result, list[float], list[float]]:
     chunks, expected_by_code = build_chunks(chunk_size)
     recalls, reciprocal_ranks = [], []
@@ -140,9 +160,35 @@ def main() -> None:
             {
                 "chunk_size": chunk_size,
                 "hybrid_recall_absolute_lift": round(sum(h - v for h, v in zip(hybrid_recall, vector_recall, strict=True)) / QUERY_COUNT, 4),
+                "hybrid_recall_lift_ci_95": paired_bootstrap_ci(vector_recall, hybrid_recall, random.Random(SEED + chunk_size + 100)),
                 "hybrid_mrr_absolute_lift": round(sum(h - v for h, v in zip(hybrid_mrr, vector_mrr, strict=True)) / QUERY_COUNT, 4),
+                "hybrid_mrr_lift_ci_95": paired_bootstrap_ci(vector_mrr, hybrid_mrr, random.Random(SEED + chunk_size + 200)),
+                "mcnemar_exact": exact_mcnemar(vector_recall, hybrid_recall),
             }
         )
+
+    chunk_sensitivity = []
+    for method in ("vector", "hybrid"):
+        recall_200, mrr_200 = raw[(200, method)]
+        recall_800, mrr_800 = raw[(800, method)]
+        chunk_sensitivity.append(
+            {
+                "method": method,
+                "recall_change_800_minus_200": round(sum(b - a for a, b in zip(recall_200, recall_800, strict=True)) / QUERY_COUNT, 4),
+                "recall_change_ci_95": paired_bootstrap_ci(recall_200, recall_800, random.Random(SEED + (300 if method == "vector" else 301))),
+                "mrr_change_800_minus_200": round(sum(b - a for a, b in zip(mrr_200, mrr_800, strict=True)) / QUERY_COUNT, 4),
+                "mrr_change_ci_95": paired_bootstrap_ci(mrr_200, mrr_800, random.Random(SEED + (400 if method == "vector" else 401))),
+            }
+        )
+
+    vector_200, _ = raw[(200, "vector")]
+    vector_800, _ = raw[(800, "vector")]
+    hybrid_200, _ = raw[(200, "hybrid")]
+    hybrid_800, _ = raw[(800, "hybrid")]
+    robustness_difference = [
+        (hybrid_800[index] - hybrid_200[index]) - (vector_800[index] - vector_200[index])
+        for index in range(QUERY_COUNT)
+    ]
 
     report = {
         "benchmark": "synthetic protocol evidence retrieval",
@@ -153,6 +199,11 @@ def main() -> None:
         "embedding": "deterministic 96-dimensional feature hashing",
         "results": [asdict(result) for result in results],
         "comparisons": comparisons,
+        "chunk_sensitivity": chunk_sensitivity,
+        "hybrid_robustness_difference_in_differences": {
+            "recall_absolute_difference": round(sum(robustness_difference) / QUERY_COUNT, 4),
+            "ci_95": bootstrap_ci(robustness_difference, random.Random(SEED + 500)),
+        },
         "limitations": [
             "Synthetic identifier-heavy corpus; results do not estimate clinical or production performance.",
             "No semantic embedding model, Chroma, pgvector, reranker, or LLM generator is used.",

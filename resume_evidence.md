@@ -36,6 +36,7 @@ GitHub Actions: https://github.com/Demianman/EvalForge/actions/runs/38658703616
 - Exact-source GitHub Actions run `38658703616` passed backend, frontend, E2E, API-contract, migration, benchmark-regression, and Compose jobs
 - Production dependency audit reported 0 vulnerabilities at the verified milestone
 - Reproducible 60-query synthetic benchmark measured Vector vs Hybrid RRF at equal Top-5: Hybrid Recall@5 was 95.00% vs 86.67% at 200-token chunks (+8.33 percentage points) and 91.67% vs 51.67% at 800-token chunks (+40.00 points)
+- Paired chunk-size analysis found Vector Recall@5 fell 35.00 points from 200 to 800 tokens (95% CI -48.33 to -21.67) while Hybrid fell 3.33 points (CI -8.33 to 0), a 31.67-point robustness advantage (CI +18.33 to +45.00)
 
 ## Architecture ownership demonstrated
 
@@ -65,5 +66,5 @@ GitHub Actions: https://github.com/Demianman/EvalForge/actions/runs/38658703616
 ## Resume bullets
 
 - Built EvalForge, a full-stack AI regression and RAG evaluation platform using Next.js, TypeScript, FastAPI, PostgreSQL, Redis/RQ, and Docker Compose, supporting versioned experiments, baseline comparisons, human review, and automated release gates.
-- Implemented an offline RAG evaluation pipeline with idempotent ingestion, citations, Recall@K/MRR, and regression detection; a reproducible 60-query synthetic benchmark measured Hybrid Recall@5 of 95.00% vs 86.67% for Vector at 200-token chunks.
+- Built a paired 60-query synthetic RAG benchmark and CI regression gate; when chunk size increased from 200 to 800 tokens, Hybrid RRF preserved Recall@5 (95.00%→91.67%) while Vector retrieval fell from 86.67% to 51.67%, a 31.67-point robustness advantage (95% CI +18.33 to +45.00).
 - Established typed OpenAPI-to-TypeScript contracts and GitHub Actions coverage across 13 backend tests, frontend tests, production builds, Chromium E2E, and a clean five-service Compose workflow that verifies queued worker execution and result persistence.

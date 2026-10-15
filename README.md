@@ -53,7 +53,9 @@ production accuracy.
 | 800 | 51.67% | 91.67% | +40.00 pp |
 
 With Vector retrieval, increasing chunk size from 200 to 800 reduced Recall@5
-by 35.00 percentage points in this corpus. See the full
+by 35.00 percentage points (paired 95% CI -48.33 to -21.67), while Hybrid fell
+only 3.33 points (CI -8.33 to 0). The paired robustness advantage was 31.67
+points (CI +18.33 to +45.00). See the full
 [methodology, MRR, confidence intervals, and limitations](docs/benchmarks/rag-retrieval.md),
 or reproduce it with `cd backend && python -m benchmarks.rag_retrieval`.
 

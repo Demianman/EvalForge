@@ -75,14 +75,75 @@
     {
       "chunk_size": 200,
       "hybrid_recall_absolute_lift": 0.0833,
-      "hybrid_mrr_absolute_lift": 0.2358
+      "hybrid_recall_lift_ci_95": [
+        0.0167,
+        0.1667
+      ],
+      "hybrid_mrr_absolute_lift": 0.2358,
+      "hybrid_mrr_lift_ci_95": [
+        0.1583,
+        0.3186
+      ],
+      "mcnemar_exact": {
+        "vector_only": 0,
+        "hybrid_only": 5,
+        "two_sided_p": 0.0625
+      }
     },
     {
       "chunk_size": 800,
       "hybrid_recall_absolute_lift": 0.4,
-      "hybrid_mrr_absolute_lift": 0.3814
+      "hybrid_recall_lift_ci_95": [
+        0.2833,
+        0.5167
+      ],
+      "hybrid_mrr_absolute_lift": 0.3814,
+      "hybrid_mrr_lift_ci_95": [
+        0.3086,
+        0.4586
+      ],
+      "mcnemar_exact": {
+        "vector_only": 0,
+        "hybrid_only": 24,
+        "two_sided_p": 1.1920928955078125e-07
+      }
     }
   ],
+  "chunk_sensitivity": [
+    {
+      "method": "vector",
+      "recall_change_800_minus_200": -0.35,
+      "recall_change_ci_95": [
+        -0.4833,
+        -0.2167
+      ],
+      "mrr_change_800_minus_200": -0.3378,
+      "mrr_change_ci_95": [
+        -0.4622,
+        -0.2192
+      ]
+    },
+    {
+      "method": "hybrid",
+      "recall_change_800_minus_200": -0.0333,
+      "recall_change_ci_95": [
+        -0.0833,
+        0.0
+      ],
+      "mrr_change_800_minus_200": -0.1922,
+      "mrr_change_ci_95": [
+        -0.2678,
+        -0.1181
+      ]
+    }
+  ],
+  "hybrid_robustness_difference_in_differences": {
+    "recall_absolute_difference": 0.3167,
+    "ci_95": [
+      0.1833,
+      0.45
+    ]
+  },
   "limitations": [
     "Synthetic identifier-heavy corpus; results do not estimate clinical or production performance.",
     "No semantic embedding model, Chroma, pgvector, reranker, or LLM generator is used."

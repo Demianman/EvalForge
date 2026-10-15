@@ -2,8 +2,8 @@
 
 Last verified: 2026-10-14  
 Repository: https://github.com/Demianman/EvalForge  
-Verified main commit: `467cd6935817ffe20843feb8c18b4abd7ea65279`  
-GitHub Actions: https://github.com/Demianman/EvalForge/actions/runs/38636430665
+Verified benchmark source commit: `c13cdba7857ccd8011c958cdf62fc56511429d1d`
+GitHub Actions: https://github.com/Demianman/EvalForge/actions/runs/38658703616
 
 ## Actual stack
 
@@ -26,14 +26,14 @@ GitHub Actions: https://github.com/Demianman/EvalForge/actions/runs/38636430665
 
 ## Verification evidence
 
-- Backend: 13 pytest tests passed
+- Backend: 14 pytest tests passed, including the deterministic benchmark regression test
 - Frontend: 4 Vitest/React Testing Library tests passed
 - ESLint, TypeScript typecheck, and Next.js production build passed
 - Clean Alembic migration through `0004` passed
 - Chromium E2E passed for sign-in, deterministic evaluation, results, RAG comparison, and citations
 - Clean Linux Docker Compose build/start passed for PostgreSQL, Redis, FastAPI, RQ worker, and Next.js
 - Compose smoke test submitted a queued evaluation and verified that the independent worker processed and persisted all 5 seeded cases before clean teardown
-- Exact-commit GitHub Actions run `38636430665` passed backend, frontend, E2E, API-contract, migration, and Compose jobs
+- Exact-source GitHub Actions run `38658703616` passed backend, frontend, E2E, API-contract, migration, benchmark-regression, and Compose jobs
 - Production dependency audit reported 0 vulnerabilities at the verified milestone
 - Reproducible 60-query synthetic benchmark measured Vector vs Hybrid RRF at equal Top-5: Hybrid Recall@5 was 95.00% vs 86.67% at 200-token chunks (+8.33 percentage points) and 91.67% vs 51.67% at 800-token chunks (+40.00 points)
 

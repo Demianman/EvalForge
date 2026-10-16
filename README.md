@@ -59,6 +59,44 @@ points (CI +18.33 to +45.00). See the full
 [methodology, MRR, confidence intervals, and limitations](docs/benchmarks/rag-retrieval.md),
 or reproduce it with `cd backend && python -m benchmarks.rag_retrieval`.
 
+### What the benchmark searches
+
+The RAG benchmark is separate from the medication entity-extraction demo. Both
+use synthetic data, but they test different system boundaries: the demo cases
+exercise structured-output evaluation, while the benchmark measures whether a
+retriever can find a labelled evidence chunk in a shared corpus.
+
+The benchmark deterministically generates 60 fictional protocol documents.
+Each document contains one unique protocol identifier and one unique evidence
+marker embedded among repeated workflow vocabulary. A simplified document is:
+
+```text
+[synthetic workflow filler]
+Protocol hcx-0000 uses evidence marker amber-0000 for its synthetic
+escalation checkpoint. This benchmark statement is fictional.
+[synthetic workflow filler]
+```
+
+Its corresponding query and preassigned ground truth are:
+
+```text
+Query: Which evidence marker controls the escalation checkpoint for protocol hcx-0000?
+Expected evidence: the chunk containing both hcx-0000 and amber-0000
+```
+
+Every query searches the complete corpus, not only its source document. With
+10% overlap, the current generator produces 360 candidate chunks at the
+200-token setting and 120 candidate chunks at the 800-token setting. A query
+is a Recall@5 hit only when its preassigned evidence chunk appears in the five
+returned chunk IDs. Its reciprocal-rank contribution is `1 / rank` for the
+first correct result, or zero when the expected chunk is absent from the Top-5.
+
+The corpus, questions, and ground-truth mapping are generated in
+[`backend/benchmarks/rag_retrieval.py`](backend/benchmarks/rag_retrieval.py).
+All content is fictional and contains no patient records, medical advice, or
+employer data. The setup is intentionally identifier-heavy and does not
+represent general clinical retrieval quality.
+
 ## Architecture
 
 ```mermaid
